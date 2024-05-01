@@ -1,7 +1,7 @@
 {
   "name": "@timeholder/time-presale",
-  "version": "1.0.5",
-  "description": "This is a governance token swap contract.",
+  "version": "1.0.6",
+  "description": "This is a governance token presale contract.",
   "license": "MIT",
   "scripts": {
     "build": "npx hardhat compile",

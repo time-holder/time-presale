@@ -1,16 +1,13 @@
-import { isAddress, parseEther } from 'viem'
+import { isAddress } from 'viem'
 import { deployProxy } from '@timeholder/time-holder/dist/utils'
 
-const GOV_TOKEN_ADDRESS = process.env
-  .GOV_TOKEN_ADDRESS as string
+const GOV_TOKEN_ADDRESS = process.env.GOV_TOKEN_ADDRESS as string
 
 async function main() {
   if (!GOV_TOKEN_ADDRESS) {
     throw new Error('Please set the `GOV_TOKEN_ADDRESS` environment variable.')
   } else if (!isAddress(GOV_TOKEN_ADDRESS)) {
-    throw new Error(
-      `\`${GOV_TOKEN_ADDRESS}\` is not a valid Ethereum address.`,
-    )
+    throw new Error(`\`${GOV_TOKEN_ADDRESS}\` is not a valid Ethereum address.`)
   }
 
   const duration = 3600 * 24 * 90

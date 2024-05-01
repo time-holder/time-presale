@@ -38,7 +38,7 @@ describe('TimePresale', () => {
       address: TIME.address,
       abi: TIME.abi,
       functionName: 'transfer',
-      args: [TimePresale.address, ((await TIME.read.totalSupply()) * 7n) / 10n],
+      args: [TimePresale.address, 100_000_000 * 10 ** 18],
     })
 
     return {
@@ -122,12 +122,8 @@ describe('TimePresale', () => {
 
   describe('Functions', () => {
     it('Receive', async () => {
-      const {
-        TimePresale,
-        publicClient,
-        user,
-        hacker,
-      } = await loadFixture(deployFixture)
+      const { TimePresale, publicClient, user, hacker } =
+        await loadFixture(deployFixture)
       await assert.isRejected(
         user.sendTransaction({
           to: TimePresale.address,
@@ -135,10 +131,22 @@ describe('TimePresale', () => {
         }),
         'AmountIsTooLow',
       )
-      assert.equal(await TimePresale.read.isContributed([user.account.address]), false)
-      assert.equal(await TimePresale.read.isContributed([hacker.account.address]), false)
-      assert.equal(await TimePresale.read.isReferrer([user.account.address]), false)
-      assert.equal(await TimePresale.read.isReferrer([hacker.account.address]), false)
+      assert.equal(
+        await TimePresale.read.isContributed([user.account.address]),
+        false,
+      )
+      assert.equal(
+        await TimePresale.read.isContributed([hacker.account.address]),
+        false,
+      )
+      assert.equal(
+        await TimePresale.read.isReferrer([user.account.address]),
+        false,
+      )
+      assert.equal(
+        await TimePresale.read.isReferrer([hacker.account.address]),
+        false,
+      )
 
       await user.sendTransaction({
         to: TimePresale.address,
@@ -185,13 +193,31 @@ describe('TimePresale', () => {
           bonus: 0n,
         },
       ])
-      assert.equal(await TimePresale.read.contributedAmount([user.account.address]), parseEther('0.51'))
-      assert.equal(await TimePresale.read.contributedAmount([hacker.account.address]), parseEther('1.1'))
+      assert.equal(
+        await TimePresale.read.contributedAmount([user.account.address]),
+        parseEther('0.51'),
+      )
+      assert.equal(
+        await TimePresale.read.contributedAmount([hacker.account.address]),
+        parseEther('1.1'),
+      )
 
-      assert.equal(await TimePresale.read.isContributed([user.account.address]), true)
-      assert.equal(await TimePresale.read.isContributed([hacker.account.address]), true)
-      assert.equal(await TimePresale.read.isReferrer([user.account.address]), false)
-      assert.equal(await TimePresale.read.isReferrer([hacker.account.address]), true)
+      assert.equal(
+        await TimePresale.read.isContributed([user.account.address]),
+        true,
+      )
+      assert.equal(
+        await TimePresale.read.isContributed([hacker.account.address]),
+        true,
+      )
+      assert.equal(
+        await TimePresale.read.isReferrer([user.account.address]),
+        false,
+      )
+      assert.equal(
+        await TimePresale.read.isReferrer([hacker.account.address]),
+        true,
+      )
 
       assert.equal(
         await publicClient.getBalance({
@@ -202,12 +228,8 @@ describe('TimePresale', () => {
     })
 
     it('Referral Bonus', async () => {
-      const {
-        TimePresale,
-        publicClient,
-        user,
-        hacker,
-      } = await loadFixture(deployFixture)
+      const { TimePresale, publicClient, user, hacker } =
+        await loadFixture(deployFixture)
       await assert.isRejected(
         hacker.writeContract({
           address: TimePresale.address,
@@ -218,10 +240,15 @@ describe('TimePresale', () => {
         }),
         'AmountIsTooLow',
       )
-      assert.equal(await TimePresale.read.isReferrer([hacker.account.address]), false)
+      assert.equal(
+        await TimePresale.read.isReferrer([hacker.account.address]),
+        false,
+      )
 
       const hackerContribution = parseEther('1')
-      const hackerPoints = await TimePresale.read.calcPoints([hackerContribution])
+      const hackerPoints = await TimePresale.read.calcPoints([
+        hackerContribution,
+      ])
       await assert.isRejected(
         hacker.writeContract({
           address: TimePresale.address,
@@ -249,7 +276,10 @@ describe('TimePresale', () => {
         }),
         'ReferrerCannotBeOneself',
       )
-      assert.equal(await TimePresale.read.isReferrer([hacker.account.address]), true)
+      assert.equal(
+        await TimePresale.read.isReferrer([hacker.account.address]),
+        true,
+      )
 
       const userContribution = parseEther('1.5')
       const userPoints = await TimePresale.read.calcPoints([userContribution])
@@ -262,8 +292,14 @@ describe('TimePresale', () => {
         value: userContribution,
       })
 
-      assert.equal(await TimePresale.read.points([user.account.address]), userPoints + bonus)
-      assert.equal(await TimePresale.read.points([hacker.account.address]), hackerPoints + (hackerPoints / 100n) + bonus)
+      assert.equal(
+        await TimePresale.read.points([user.account.address]),
+        userPoints + bonus,
+      )
+      assert.equal(
+        await TimePresale.read.points([hacker.account.address]),
+        hackerPoints + hackerPoints / 100n + bonus,
+      )
       assert.equal(
         await publicClient.getBalance({
           address: TimePresale.address,
@@ -278,20 +314,20 @@ describe('TimePresale', () => {
         args: [hacker.account.address],
         value: userContribution,
       })
-      const referrals = await TimePresale.read.referrals([hacker.account.address])
+      const referrals = await TimePresale.read.referrals([
+        hacker.account.address,
+      ])
       assert.equal(referrals.length, 2)
       assert.deepEqual(referrals, [1n, 2n])
-      assert.equal(await TimePresale.read.referrerBonus([hacker.account.address]), bonus * 2n)
+      assert.equal(
+        await TimePresale.read.referrerBonus([hacker.account.address]),
+        bonus * 2n,
+      )
     })
 
     it('Early Bird Reward', async () => {
-      const {
-        TimePresale,
-        publicClient,
-        user,
-        hacker,
-        deadline,
-      } = await loadFixture(deployFixture)
+      const { TimePresale, publicClient, user, hacker, deadline } =
+        await loadFixture(deployFixture)
 
       // User contribute
       assert.equal(await TimePresale.read.points([user.account.address]), 0n)
@@ -376,7 +412,10 @@ describe('TimePresale', () => {
           }),
           'PresaleLimitHasBeenExceeded',
         )
-        assert.equal((await TimePresale.read.contribution()).length, contributionCount)
+        assert.equal(
+          (await TimePresale.read.contribution()).length,
+          contributionCount,
+        )
         assert.equal(
           await publicClient.getBalance({ address: TimePresale.address }),
           ETHBalance,
@@ -388,6 +427,33 @@ describe('TimePresale', () => {
         user.sendTransaction({
           to: TimePresale.address,
           value: hackerContributionETHAgain,
+        }),
+        'DeadlineHasPassed',
+      )
+    })
+
+    it('Deadline Passed Early', async () => {
+      const { TimePresale, user } = await loadFixture(deployFixture)
+
+      for (let i = 0; i < 9; i++) {
+        await user.writeContract({
+          address: TimePresale.address,
+          abi: TimePresale.abi,
+          functionName: 'contribute',
+          args: [],
+          value: parseEther('1'),
+        })
+      }
+
+      assert.equal(await TimePresale.read.sumPoints(), 93600000n)
+      assert.equal(await TimePresale.read.isDeadlinePassed(), true)
+      await assert.isRejected(
+        user.writeContract({
+          address: TimePresale.address,
+          abi: TimePresale.abi,
+          functionName: 'contribute',
+          args: [],
+          value: parseEther('1'),
         }),
         'DeadlineHasPassed',
       )
@@ -414,8 +480,14 @@ describe('TimePresale', () => {
         value: parseEther('2'),
       })
       await time.increaseTo(deadline + 1)
-      assert.equal(await TimePresale.read.isClaimed([user.account.address]), false)
-      assert.equal(await TimePresale.read.isClaimed([hacker.account.address]), false)
+      assert.equal(
+        await TimePresale.read.isClaimed([user.account.address]),
+        false,
+      )
+      assert.equal(
+        await TimePresale.read.isClaimed([hacker.account.address]),
+        false,
+      )
 
       const decimals = await TimePresale.read.govTokenDecimals()
 
@@ -432,7 +504,10 @@ describe('TimePresale', () => {
           await TIME.read.balanceOf([user.account.address]),
           expectTokenQuantity,
         )
-        assert.equal(await TimePresale.read.isClaimed([user.account.address]), true)
+        assert.equal(
+          await TimePresale.read.isClaimed([user.account.address]),
+          true,
+        )
       }
 
       {
@@ -448,7 +523,10 @@ describe('TimePresale', () => {
           await TIME.read.balanceOf([hacker.account.address]),
           expectTokenQuantity,
         )
-        assert.equal(await TimePresale.read.isClaimed([hacker.account.address]), true)
+        assert.equal(
+          await TimePresale.read.isClaimed([hacker.account.address]),
+          true,
+        )
       }
     })
   })

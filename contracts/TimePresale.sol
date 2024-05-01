@@ -244,7 +244,7 @@ contract TimePresale is ITimePresale, Gov {
     emit Contributed(contributor, amount, referrer, bonus);
 
     if (_maxTokenQuantity - _totalTokenQuantity < _getTokenQuantity(calcPoints(MIN_REMAINING_AMOUNT))) {
-      _setDeadline(block.timestamp);
+      _setDeadline(block.timestamp - 1);
     }
   }
 
