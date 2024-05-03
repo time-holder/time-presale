@@ -7,9 +7,9 @@ import * as chains from 'viem/chains'
 import type { Chain } from 'viem'
 import fs from 'node:fs'
 
-let blockExplorerApiKeys = {}
+let networks: Record<string, Record<string, string>> = {}
 try {
-  blockExplorerApiKeys = JSON.parse(fs.readFileSync('./blockExplorerApiKeys.json', 'utf8'))
+  networks = JSON.parse(fs.readFileSync('./networks.json', 'utf8'))
 } catch (err) {}
 
 const accounts = [
@@ -27,8 +27,11 @@ const config: HardhatUserConfig = {
     }
   },
   etherscan: {
-    apiKey: blockExplorerApiKeys,
-    customChains: Object.keys(blockExplorerApiKeys)
+    apiKey: Object.keys(networks).reduce((acc: Record<string, string>, key) => {
+      acc[key] = networks[key].apiKey
+      return acc
+    }, {}),
+    customChains: Object.keys(networks)
       .map((key: string) => {
         const chain: Chain = chains[key as keyof typeof chains]
         if (chain) {
@@ -50,7 +53,7 @@ const config: HardhatUserConfig = {
     enabled: true
   },
   networks: Object.fromEntries(
-    Object.keys(blockExplorerApiKeys)
+    Object.keys(networks)
       .map((key: string) => {
         const chain: Chain = chains[key as keyof typeof chains]
         if (chain) {
@@ -58,7 +61,7 @@ const config: HardhatUserConfig = {
             key,
             {
               chainId: chain.id,
-              url: chain.rpcUrls.default.http[0],
+              url: networks[key].rpc || chain.rpcUrls.default.http[0],
               accounts,
             }
           ]

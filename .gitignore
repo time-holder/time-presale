@@ -4,7 +4,7 @@ node_modules
 .DS_Store
 .openzeppelin
 dist
-blockExplorerApiKeys.json
+networks.json
 
 # Hardhat files
 /cache

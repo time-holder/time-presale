@@ -10,7 +10,7 @@ interface ITimePresale {
   }
 
   /**
-   * @dev Record the deadline.
+   * @dev Record the setting deadline.
    */
   event SetDeadline(uint256 deadline);
 
